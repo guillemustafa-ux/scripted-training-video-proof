@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DemoScan - Options Scanner (fictional data)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #0f1420; color: #d8dee9; }
+  header { display: flex; align-items: center; gap: 24px; padding: 12px 20px; background: #161d2e; border-bottom: 1px solid #263048; }
+  header h1 { font-size: 16px; margin: 0; color: #7aa2f7; }
+  nav button { background: none; border: 0; color: #a9b1c6; padding: 6px 10px; cursor: pointer; font: inherit; }
+  nav button.active { color: #fff; border-bottom: 2px solid #7aa2f7; }
+  main { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 16px 20px; }
+  .panel { background: #161d2e; border: 1px solid #263048; border-radius: 6px; padding: 14px; }
+  label { display: block; margin: 10px 0 4px; color: #a9b1c6; font-size: 12px; }
+  input, select { width: 100%; padding: 6px 8px; background: #0f1420; color: #d8dee9; border: 1px solid #33405e; border-radius: 4px; font: inherit; }
+  .run { margin-top: 14px; width: 100%; padding: 8px; background: #7aa2f7; color: #0f1420; border: 0; border-radius: 4px; font-weight: 600; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: right; padding: 7px 8px; border-bottom: 1px solid #263048; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: #a9b1c6; font-weight: 500; font-size: 12px; }
+  tr.selected { background: #22304d; }
+  tbody tr { cursor: pointer; }
+  .up { color: #9ece6a; } .down { color: #f7768e; }
+  #chart { margin-top: 16px; height: 190px; }
+  .muted { color: #6b7591; font-size: 12px; }
+  .banner { background: #3b2f12; color: #e0af68; padding: 4px 20px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="banner">Fictional demo data - not market data, not advice.</div>
+<header>
+  <h1>DemoScan</h1>
+  <nav>
+    <button class="active" data-testid="tab-scanner">Scanner</button>
+    <button data-testid="tab-chains">Option chains</button>
+    <button data-testid="tab-alerts">Alerts</button>
+  </nav>
+</header>
+<main>
+  <section class="panel" data-testid="filters">
+    <strong>Unusual options activity</strong>
+    <label for="minvol">Min volume / open interest</label>
+    <input id="minvol" data-testid="min-vol-oi" value="1.0">
+    <label for="expiry">Expiry within</label>
+    <select id="expiry" data-testid="expiry">
+      <option>7 days</option><option selected>30 days</option><option>90 days</option>
+    </select>
+    <label for="side">Side</label>
+    <select id="side" data-testid="side"><option>Calls and puts</option><option>Calls</option><option>Puts</option></select>
+    <button class="run" data-testid="run-scan">Run scan</button>
+    <p class="muted" data-testid="scan-status">Last scan: never</p>
+  </section>
+  <section class="panel">
+    <table data-testid="results">
+      <thead><tr><th>Ticker</th><th>Strike</th><th>Expiry</th><th>Type</th><th>Vol/OI</th><th>IV</th><th>Chg</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <canvas id="chart" data-testid="chart" width="900" height="190"></canvas>
+  </section>
+</main>
+<script>
+  const ROWS = [
+    ["AAA", 120, "Nov 21", "Call", 4.8, "62%", 3.1],
+    ["BBB", 45, "Nov 28", "Put", 3.2, "71%", -2.4],
+    ["CCC", 310, "Dec 05", "Call", 2.7, "38%", 1.2],
+    ["DDD", 18, "Nov 21", "Put", 2.1, "88%", -5.6],
+    ["EEE", 75, "Dec 19", "Call", 1.6, "44%", 0.8],
+    ["FFF", 210, "Nov 14", "Call", 1.2, "29%", 0.3],
+  ];
+  const tbody = document.querySelector("tbody");
+  const status = document.querySelector("[data-testid=scan-status]");
+  function render(min) {
+    tbody.innerHTML = "";
+    ROWS.filter(r => r[4] >= min).forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.dataset.testid = "row-" + r[0];
+      tr.innerHTML = r.map((c, j) => j === 6 ? `<td class="${c >= 0 ? "up" : "down"}">${c > 0 ? "+" : ""}${c}%</td>` : `<td>${c}</td>`).join("");
+      tr.onclick = () => { document.querySelectorAll("tr.selected").forEach(x => x.classList.remove("selected")); tr.classList.add("selected"); draw(i + 1); };
+      tbody.appendChild(tr);
+    });
+  }
+  function draw(seed) {
+    const c = document.getElementById("chart"), g = c.getContext("2d");
+    g.clearRect(0, 0, c.width, c.height);
+    g.strokeStyle = "#263048";
+    for (let y = 30; y < c.height; y += 40) { g.beginPath(); g.moveTo(0, y); g.lineTo(c.width, y); g.stroke(); }
+    g.strokeStyle = "#7aa2f7"; g.lineWidth = 2; g.beginPath();
+    let v = 95;
+    for (let x = 0; x <= c.width; x += 6) {
+      v += Math.sin((x + seed * 37) / 23) * 2.2 + Math.cos((x * seed) / 97) * 1.4;
+      x === 0 ? g.moveTo(x, v) : g.lineTo(x, v);
+    }
+    g.stroke();
+  }
+  document.querySelector("[data-testid=run-scan]").onclick = () => {
+    render(parseFloat(document.getElementById("minvol").value) || 0);
+    status.textContent = "Last scan: just now - " + tbody.children.length + " contracts";
+  };
+  render(99); draw(1);
+</script>
+</body>
+</html>

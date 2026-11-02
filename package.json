@@ -1,0 +1,24 @@
+{
+  "name": "scripted-training-video-proof",
+  "version": "1.0.0",
+  "description": "Training videos from a script: Playwright drives the app, Remotion adds captions and highlights. A script that names a missing element fails before recording.",
+  "scripts": {
+    "test": "node --test test/script.test.mjs",
+    "check": "node bin/make-video.mjs scripts/unusual-options-scan.json --check",
+    "video": "node bin/make-video.mjs scripts/unusual-options-scan.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@remotion/cli": "^4.0.540",
+    "playwright": "^1.64.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.540"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

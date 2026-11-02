@@ -1,0 +1,14 @@
+{
+  "title": "How to scan for unusual options activity",
+  "url": "app/scanner.html",
+  "steps": [
+    { "action": "caption", "text": "This lesson shows how to find contracts trading far above their open interest.", "holdMs": 3200 },
+    { "action": "highlight", "target": "filters", "text": "All scan settings live in the filter panel on the left.", "holdMs": 3000 },
+    { "action": "fill", "target": "min-vol-oi", "value": "2.0", "text": "Set the minimum volume to open interest ratio. 2.0 means twice the usual activity.", "holdMs": 3400 },
+    { "action": "select", "target": "expiry", "value": "30 days", "text": "Limit the scan to expiries in the next 30 days.", "holdMs": 2800 },
+    { "action": "click", "target": "run-scan", "text": "Run the scan.", "holdMs": 2200 },
+    { "action": "highlight", "target": "results", "text": "Matching contracts appear here, sorted by volume to open interest.", "holdMs": 3200 },
+    { "action": "click", "target": "row-AAA", "text": "Click a row to load its price chart below.", "holdMs": 3200 },
+    { "action": "highlight", "target": "chart", "text": "Use the chart to check the move before you act on the signal.", "holdMs": 3200 }
+  ]
+}
